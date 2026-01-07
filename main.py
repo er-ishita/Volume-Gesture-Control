@@ -7,7 +7,6 @@ import math
 #must do- "pip install pycaw"
 from pycaw.pycaw import AudioUtilities
 
-
 device = AudioUtilities.GetSpeakers()
 volume = device.EndpointVolume
 ptime=0
@@ -20,6 +19,10 @@ volumeRange=volume.GetVolumeRange()
 # print(volumeRange)==(-63.5, 0.0, 0.5)
 minVol=volumeRange[0]
 maxVol=volumeRange[1]
+
+vol=0
+volBar=330
+volPer=0
 
 print("Press 'q' at anytime to close")
 
@@ -64,6 +67,16 @@ while True:
 
         vol=np.interp(length,[20,200],[minVol,maxVol])
         volume.SetMasterVolumeLevel(vol, None)
+
+        ##volume bar:
+        volBar=int(np.interp(length,[20,200],[330,120]))
+        
+        volPer=int(np.interp(length,[20,200],[0,100]))
+
+    cv2.rectangle(img, (50,120),(85,330),(0,255,0),2)
+    cv2.rectangle(img, (50,volBar),(85,330),(0,255,0),cv2.FILLED)
+    cv2.putText(img,f'{volPer}%',(35,400),1,cv2.FONT_HERSHEY_COMPLEX,(0,255,0),3)
+
 
     cv2.putText(img,f'FPS: {fps}',(10,70),1,cv2.FONT_HERSHEY_COMPLEX,(255,0,0),3)
     cv2.imshow("Volume Controller",img)
