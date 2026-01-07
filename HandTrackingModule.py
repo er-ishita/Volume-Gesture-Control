@@ -18,7 +18,7 @@ class HandDetector:
     def findHands(self,img, draw=True):
         imgRGB=cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.results=self.hand.process(imgRGB)
-        print(self.results.multi_hand_landmarks)
+        # print(self.results.multi_hand_landmarks)
         
         if self.results.multi_hand_landmarks:
             w,h,_=img.shape
@@ -27,7 +27,20 @@ class HandDetector:
                     self.mpDraw.draw_landmarks(img, handlm, self.mpHand.HAND_CONNECTIONS)
 
         return img
-        
+    
+    def findPosition(self,img,handNo=0, draw=True):
+        # imgRGB=cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
+        lmList=[]
+
+        if self.results and self.results.multi_hand_landmarks:
+            hand=self.results.multi_hand_landmarks[handNo]
+            h,w,_=img.shape
+            for id,lm in enumerate(hand.landmark):
+                cx,cy=int(lm.x*w),int(lm.y*h)
+                if draw:
+                    cv2.circle(img,(cx,cy),10,(0,255,0),cv2.FILLED)
+                lmList.append([id,cx,cy])
+        return lmList
 
 def main():
     cam=cv2.VideoCapture(0)
@@ -43,11 +56,15 @@ def main():
 
         img=cv2.flip(img,1)
         img=detect.findHands(img)
+        lm=detect.findPosition(img)
 
         ctime=time.time()
         fps=int(1/(ctime-ptime))
         ptime=ctime
 
+        if len(lm)!=0:
+            print(lm[4])
+        
         cv2.putText(img,f'FPS: {fps}', (10,70),cv2.FONT_HERSHEY_COMPLEX,2,(255,0,0),2)
         cv2.imshow("WebCam",img)
 
@@ -59,4 +76,5 @@ def main():
     cv2.destroyAllWindows()
 
 
-main()
+if __name__=="__main__":
+    main()
