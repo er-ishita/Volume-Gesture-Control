@@ -1,5 +1,4 @@
 import cv2
-import mediapipe
 import numpy as np
 import time
 import HandTrackingModule as htm
@@ -19,11 +18,8 @@ detect=htm.HandDetector()
 
 volumeRange=volume.GetVolumeRange()
 # print(volumeRange)==(-63.5, 0.0, 0.5)
-
 minVol=volumeRange[0]
 maxVol=volumeRange[1]
-
-volume.SetMasterVolumeLevel(-20.0, None)
 
 print("Press 'q' at anytime to close")
 
@@ -48,9 +44,26 @@ while True:
         x1,y1=lmlist[4][1],lmlist[4][2]
         x2,y2=lmlist[8][1],lmlist[8][2]
         
+        cx,cy=(x1+x2)//2,(y1+y2)//2
+
+        cv2.circle(img,(cx,cy),15,(255,0,255),cv2.FILLED)
+
         cv2.circle(img, (x1,y1),10,(255,0,255),cv2.FILLED)
         cv2.circle(img, (x2,y2),10,(255,0,255),cv2.FILLED)
         cv2.line(img, (x1,y1),(x2,y2),(255,0,255),3)
+
+        length=math.hypot(x2-x1,y2-y1)
+
+        #myscale= 20-200
+        if length<20:
+            cv2.circle(img,(cx,cy),15,(0,255,0),cv2.FILLED)
+
+        if length>200:
+            cv2.circle(img,(cx,cy),15,(255,0,0),cv2.FILLED)
+            cv2.line(img, (x1,y1),(x2,y2),(255,0,0),4)
+
+        vol=np.interp(length,[20,200],[minVol,maxVol])
+        volume.SetMasterVolumeLevel(vol, None)
 
     cv2.putText(img,f'FPS: {fps}',(10,70),1,cv2.FONT_HERSHEY_COMPLEX,(255,0,0),3)
     cv2.imshow("Volume Controller",img)
